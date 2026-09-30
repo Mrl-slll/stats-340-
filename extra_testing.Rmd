@@ -10,9 +10,28 @@ I have two routes I can take home from work. I want to find if one is faster, so
 ```{r}
 timesA = c(25, 27, 26, 26, 27, 25, 23, 24, 26, 23)
 timesB = c(31, 29, 24, 23, 34, 29, 28, 29, 29, 28, 30, 20, 25, 29)
+perm= sample(c(timesA, timesB))
+perm
+
+perm=sample(c(timesA, timesB)); mean(perm[1:10]):-mean(perm[11:24])
+perm
+
+
 ```
 
 Is one route longer than the other? State your hypotheses and conduct a hypothesis test. Give a p-value and interpretation.
+
+```{r}
+#compare the average length of the two roughts
+test_results<-t.test(timesA,timesB)
+test_results
+
+test_results$p.value
+
+#avg of time A is faster of AVG ot time B so A is faster
+```
+
+
 
 ## 2
 
@@ -22,8 +41,24 @@ Pete and Repete play on the school basketball team. The coach feels like Repete 
 pete.scores   = c(19, 17, 20, 19, 18, 17, 20, 19, 24, 20, 18, 24, 20, 22, 21)
 repete.scores = c(15, 19, 20, 21,  9, 28, 18, 19, 21, 19, 14, 17, 14,  5,  9)
 ```
+```{r}
+mean(pete.scores)
+mean(repete.scores)
+pete<-pete.scores-mean(pete.scores)
+repete<-repete.scores-mean(pete.scores)
+pete
+replicate<-replicate( 1e5)
+
+
+```
 
 Is Repete less consistent than Pete? State your hypotheses and conduct a hypothesis test. Give a p-value and interpretation.
+```{r}
+#compute and compare the variance
+test<-var.test(pete.scores,repete.scores)
+
+test
+```
 
 ## 3
 
