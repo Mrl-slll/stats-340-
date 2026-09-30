@@ -1,0 +1,369 @@
+---
+title: "Homework 2"
+output: 
+  html_document:
+    self_contained: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=T,eval=T,message=F,warning=F,fig.align='center')
+library(tidyverse)
+library(ggplot2)
+```
+
+## 1. Probability Warmup <small>(1pt each, 6pts total)</small>
+
+a. Consider $X\sim \text{Normal}(3, 4^2)$. Find $P(4 < X < 7)$
+```{r}
+pnorm(7,mean = 3, sd=4)-pnorm(4,mean = 3,sd=4)
+```
+
+b. For $X$ above, find the 75th percentile, i.e. find $q$ such that $P(X < q)=.75$
+```{r}
+qnorm(0.75,mean = 3, sd= 4)
+```
+
+c. Consider $Y\sim Geometric(.25)$. Find $P(Y \leq 5)$
+note:dgeom is the number of failier at the first success
+     pgeom is the number of failier before the first success
+```{r}
+pgeom(5,0.25)
+```
+
+d. Consider $W \sim Poisson(8)$. Find $P(W \geq 13)$
+```{r}
+1-ppois(12, lambda =8 )
+```
+
+e. What is the 95th percentile for $W$? Is the probability less than this value exactly 95%? (If not, then why?)
+```{r}
+qpois(0.95,lambda = 8)
+```
+because the Poisson distribution is discrete, its cumulative distribution function increases in step jumps, so exact probabilities like $0.95$ are rarely hit precisely
+
+f. Assuming they are independent, what is the expected value and variance of $X+Y+W$?
+```{r}
+exp_X <- 3; Var_X <- 4^2       
+exp_Y <- (1 - 0.25) / 0.25; Var_Y <- (1 - 0.25) / (0.25^2) 
+exp_W <- 8; Var_W <- 8        
+
+total_E <- exp_X + exp_Y + exp_W
+total_Var <- Var_X + Var_Y + Var_W 
+```
+
+
+
+## 2. Choosing the best model <small>(1pt each, 7 pts total)</small>
+
+For each of the following scenarios, decide what random variable may be appropriate to use as a model, and explain your reasoning as well as any assumptions you make.
+
+a. The number of patients in an experimental drug trial that respond to treatment.
+Binomial random variable
+
+b. The number of red cars you observe driving through an intersection between 10am and 11am.
+Poisson random variable
+
+c. What the second hand reads on the clock when you wake up (without an alarm clock) from a long nap (approximately). 
+uniform distribution
+
+d. How many people you need to swipe right on Tinder before you get a match. 
+geometric random variable
+
+e. The length of time between mosquito bites a camper experiences while on a hike. 
+Exponential random variable
+
+f. Whether the Eagles win the Superbowl this year. 
+bernouli random vatriable
+
+g. The GPA of a randomly selected UW-Madison graduate.
+
+continuous random variable
+
+## 3. Mousetrap: A Rube Goldberg Machine  <small>(1pt each, 5pts total)</small>
+
+Consider the board game [Mousetrap](https://youtu.be/fOyq6Nc8660?si=WFJ-ldFsqsxg0Khx). When you trigger the trap, the ball needs to 
+
+1. roll down a **ramp**,
+2. be carried up by a **hammer**,
+3. roll  down another **ramp**,
+4. go down a bathtub **drain**,
+5. land on a **lever** which
+6. sends a diver into a **basin** which then
+7. causes the **trap** to descend.
+
+Suppose you can model the success of each component as independent Bernoulli random variables $X_1$ through $X_7$, where the probability of $X_i$ succeeding is $.85$ for each component (this is an arbitrary probability for this HW problem). 
+
+a. What is the probability that the trap works correctly from beginning to end?
+```{r}
+prop<-0.85**7
+prop
+
+```
+
+b. If you attempt the trap 20 times during a game, how many times do you expect it to work correctly from beginning to end?
+```{r}
+prop*20
+
+```
+
+c. Suppose you let the marble go: Let $Y$ be the number of components of the trap that work in a row. If one component fails, then you stop counting. Calculate the probability mass function of $Y$. *Hints: $Y$ can have values $0, 1, 2, 3, 4, 5, 6$ or $7$. This is like a Geometric r.v. except it does not have infinite support. How can you use this fact to determine the pmf? Be careful: what is a 'success' in this context?*
+```{r}
+p_f <- 0.15
+
+pmf <- c(dgeom(0:6, prob = p_f), 1 - pgeom(6, prob = p_f))
+
+names(pmf) <- 0:7
+print(pmf)
+```
+
+
+d. Calculate the expected value of $Y$ and its variance. 
+```{r}
+exp_value<-(1-pmf)/pmf
+exp_value
+```
+
+
+e. What is $P(Y = 6 | Y \geq 3)$?
+```{r}
+Y_3<-pgeom(2,prob = 0.15)
+Y_3
+Y_6<-dgeom(6,prob =0.15)
+Y_6
+Y_6/(1-Y_3)
+
+
+
+```
+
+
+
+## 4. Correlated Normal Random Variables <small>(2pts each, 10pts total)</small>
+
+Let $X$ and $Y$ be normally distributed random variables with $\mu_X=50$ and $\mu_Y=30$. Their covariance matrix given by 
+$$\Sigma = \left[\begin{matrix}100 & 75\\75 & 225\end{matrix}\right]$$
+In other words, $\sigma^2_X=10^2$, $\sigma^2_Y=15^2$ and $\rho_{XY}=.5$.
+
+a. Using the rules of combining random variables, find the distribution of $X+Y$. (*hint: the sum of two normally distributed random variables will also follow a normal distribution*)
+```{r}
+exp<- 50+30
+variance<-100+225+75+75
+exp
+variance
+sd_XY=sqrt(variance)
+sd_XY
+
+```
+
+b. Calculate $Pr[60 < X+Y < 90]$
+```{r}
+Pr<-pnorm(90,mean = 80, sd=sd_XY)-pnorm(60, mean=80,sd=sd_XY)
+Pr
+```
+
+To simulate values from this distribution we can use the `mvrnorm` function in the MASS package. The following code will generate a dataframe with 10000 samples from this distribution.
+```{r}
+library(MASS)
+mu <- c(50,30)
+Sigma <- matrix(c(100,75,75,225), byrow=T, nrow=2)
+XYdata <- mvrnorm(10000, mu, Sigma)
+colnames(XYdata) <- c("X","Y")
+XYdata <- as.data.frame(XYdata)
+# un-comment the next line to plot the data
+# ggplot(XYdata) + geom_point(aes(x=X, y=Y), pch=1)
+```
+
+c. Create a new column `W` that is `X+Y`. Using the values in this column, verify your answer for part a. using a histogram and calculating the mean and variance of $W$.
+```{r}
+XYdata$W<- XYdata$X + XYdata$Y
+ggplot(XYdata, aes(x = W)) + geom_histogram(color = "black", fill = "steelblue")
+mean(XYdata$W)
+var(XYdata$W)
+```
+
+d. Using the values in `W`, verify your answer for part b.
+```{r}
+d<-mean(XYdata$W>60 & XYdata$W<90)
+d
+```
+
+e. Using your simulated data, approximate an answer to $Pr(Y > 50 | X > 65)$.
+
+```{r}
+mean(XYdata$Y[XYdata$X > 65] > 50)
+```
+
+
+## 5. The Geometric, The Poisson and the Exponential <small>(2pts each, 14pts total)</small>
+
+In this problem we'll explore the relationship between three random variable distributions.
+
+Suppose we're modeling an experiment where photons hit a glass plate. The average rate of collision is 90/second.
+
+a. What is the probability that 100 or fewer photons hit the plate in one second?
+```{r}
+ppois(100,lambda=90)
+```
+
+b. After a photon hits, what is the probability that it takes .03 or fewer seconds for the next photon to hit?
+```{r}
+pexp(.03,rate = 90)
+```
+
+c. What is the probability that it takes 1 millisecond (.001 seconds) or fewer for the first collision?
+```{r}
+p<-pexp(.001,rate = 90)
+p
+```
+
+The following code will simulate the times between collisions in seconds.
+```{r}
+collision.s <- rexp(10000, 90)
+```
+
+Suppose we are counting collisions per second. The following code will count how many collisions occur during each second of the experiment.
+
+```{r}
+collision.count <-
+  as.vector(tabulate(floor(cumsum(collision.s))))
+collision.count
+
+```
+
+d. Plot a histogram of the `collision.count`. What is the mean number of collisions per second? In theory what should the distribution of `collision.count` be *(hint: think about the Poisson distribution)*?
+
+```{r}
+histogram <- data.frame(collision.count) %>% 
+  ggplot(aes(x = collision.count)) +
+  geom_histogram(binwidth = 1, color = "black", fill = "steelblue") +
+  labs(
+    title = "Histogram of Collisions per Second",
+    x = "Collision Count",
+    y = "Frequency"
+  )
+
+histogram
+
+mean(collision.count)
+```
+In theory, collision.count follows a $\text{Poisson}(\lambda = 90)$ distribution.
+
+Now we'll see how the exponential is related to the geometric distribution. Suppose we were to round down to the nearest millisecond - to convert seconds to milliseconds, multiply by 1000, and round **down** (*floor*) to the nearest integer. In this sense, we could consider the data recorded as "counting how many milliseconds before the next collision". 
+
+e. Convert to milliseconds and save this vector as `collision.ms`. Plot a histogram of the milliseconds, and calculate the mean and variance. If you were to model the collision time (ms) as a geometric random variable, what parameter $p$ would you use? (*hint: the expected value of a geometric rv is $\frac{1}{p}-1$.*)
+```{r}
+
+m <- floor(collision.s * 1000)
+
+data.frame(m) %>% ggplot(aes(x = m)) +
+  geom_histogram(binwidth = 1, color = "black", fill = "steelblue")
+
+mean(m)
+var(m)
+
+# Estimate p: E[m] = (1-p)/p -> p = 1 / (mean(m) + 1)
+p_est <- 1 / (mean(m) + 1)
+p_est
+
+```
+
+f. If we record our data in milliseconds rather than seconds, what would the average number of collisions per millisecond be?
+```{r}
+
+collisions_per_ms <- 90 / 1000
+collisions_per_ms
+```
+
+
+g. If you have $Y \sim Exp(\lambda)$, it turns out that the floor function $\lfloor{Y}\rfloor \sim Geom(1-e^{-\lambda})$. Check to see if $1-e^{-\lambda}$ is close to the $p$ you found earlier.
+```{r}
+
+lambda_ms <- 90 / 1000  # 0.09
+
+p_theoretical <- 1 - exp(-lambda_ms)
+p_theoretical
+
+
+p_estimated <- 1 / (mean(m) + 1)
+p_estimated
+
+abs(p_theoretical - p_estimated)
+```
+
+
+
+## 6. Random Variables in a Coffee Shop <small>(1pt each, 8pts total)</small>
+
+A small coffee shop records the number of customers arriving each morning between 8–9 a.m. They have noticed that:
+
+
+* On average, 12 customers arrive in that hour. The arrivals can be modeled as a Poisson random variable.
+```{r}
+
+```
+
+* Each customer spends, on average, \$5.50 with a standard deviation of \$1.50. The spending per customer is independent and approximately follows a Normal distribution.
+
+Let $X$ be the number of customers who arrive between 8–9 a.m.
+
+a. Write down the distribution of $X$.
+```{r}
+lambda<-12
+lambda
+
+```
+
+b. What is the probability that exactly 10 customers arrive in an hour?
+```{r}
+dpois(10,lambda = 12)
+```
+
+c. What is the probability that at least 15 customers arrive in an hour?
+```{r}
+1-ppois(14,lambda = 12)
+```
+
+Let $Y$ be the spending of a single customer.
+
+d. State the distribution of $Y$.
+
+Y:Y<- N(5.50,1.50^2)
+
+
+e. What is the probability a single customer spends more than $6?
+```{r}
+1-pnorm(6,mean = 5.50, sd=1.50)
+```
+
+
+Now let $W$ be the total revenue between 8–9 a.m.
+
+f. What is the expected value of $W$?
+
+```{r}
+exp_val<-12*5.50
+exp_val
+```
+
+g. What is the variance of $W$? (*hint: $W$ is a random sum: $W=\sum_{i=1}^X Y_i$. The variance of a random sum is $Var(W)=EX\cdot VarY + VarX \cdot E^2Y$*)
+```{r}
+
+EX <- 12
+VarX <- 12         
+EY <- 5.50
+VarY <- 1.50^2     
+
+VarW <- (EX * VarY) + (VarX * (EY^2))
+VarW
+
+```
+
+h. Explain why the exact distribution of $W$ is complicated. Suggest a method that could be used to approximate it.
+
+Usually, probability problems only have one moving part. Here, two independent things fluctuate at the exact same time:
+
+You don't know how many people walk through the door (it could be 5, 12, or 20).
+
+You don't know how much money each individual spends (one person buys a 3 dollar drip coffee; another spends $15 on lattes and pastries)
+
+Normal Approximation (Central Limit Theorem)Since the expected number of arrivals ($\lambda = 12$) is moderately large, $W$ can be approximated using a single Normal distribution parameterized by the mean $E[W]$ and variance $\text{Var}(W)$ found in parts f and g:$$W \approx \text{Normal}(\mu = 66, \, \sigma^2 = 390)$$

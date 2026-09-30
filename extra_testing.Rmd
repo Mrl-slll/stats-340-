@@ -1,0 +1,37 @@
+---
+title: "Extra testing problems"
+output: html_document
+---
+
+## 1
+
+I have two routes I can take home from work. I want to find if one is faster, so I collect some data over many days. Assume days are independent and I randomly choose a route by flipping a coin.
+
+```{r}
+timesA = c(25, 27, 26, 26, 27, 25, 23, 24, 26, 23)
+timesB = c(31, 29, 24, 23, 34, 29, 28, 29, 29, 28, 30, 20, 25, 29)
+```
+
+Is one route longer than the other? State your hypotheses and conduct a hypothesis test. Give a p-value and interpretation.
+
+## 2
+
+Pete and Repete play on the school basketball team. The coach feels like Repete is a **less consistent** player in terms of points scored per game. A random sampling of 15 of each of their performances is collected.
+
+```{r}
+pete.scores   = c(19, 17, 20, 19, 18, 17, 20, 19, 24, 20, 18, 24, 20, 22, 21)
+repete.scores = c(15, 19, 20, 21,  9, 28, 18, 19, 21, 19, 14, 17, 14,  5,  9)
+```
+
+Is Repete less consistent than Pete? State your hypotheses and conduct a hypothesis test. Give a p-value and interpretation.
+
+## 3
+
+You're watching for a certain species of birds when you notice they tend to exhibit flocking behavior, i.e. they may not be flying independently. You start counting birds and writing down how many you see for every 10min interval.
+
+```{r}
+counts = c(5,3,0,10,8,0,0,7,5,12,8,5,11,4,0,6,0,4,0,0,4,3,4,0,2,4,3,3,5,5,4,4)
+```
+
+Conduct a hypothesis test to show that the distribution of bird counts you see is probably NOT poisson.
+
